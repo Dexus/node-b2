@@ -1,0 +1,14 @@
+{
+  "name": "node-b2",
+  "version": "1.0.0",
+  "description": "Library for B2 Cloud Storage by Backblaze",
+  "main": "B2.js",
+  "scripts": {
+    "test": "node test/test.js"
+  },
+  "author": "nibral",
+  "license": "MIT",
+  "dependencies": {
+    "request": "^2.69.0"
+  }
+}
