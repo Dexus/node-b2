@@ -22,10 +22,10 @@ b2app.authorizeAccount(config.AccountID, config.ApplicationKey).then((response) 
                 console.log('usage: node test.js b2_create_bucket bucketName [private]');
                 process.exit(1);
             }
-            const bucketName = process.argv[3];
-            const isPrivate = (process.argv[4] && process.argv[4] === 'private') ? true : false;
+            const newBucketName = process.argv[3];
+            const isNewBucketPrivate = (process.argv[4] && process.argv[4] === 'private') ? true : false;
 
-            b2app.createBucket(bucketName, isPrivate).then((result) => {
+            b2app.createBucket(newBucketName, isNewBucketPrivate).then((result) => {
                 console.log(result);
             }).catch((error) => {
                 console.log(error);
@@ -51,6 +51,32 @@ b2app.authorizeAccount(config.AccountID, config.ApplicationKey).then((response) 
                 result.buckets.forEach((bucket) => {
                     console.log(bucket);
                 });
+            }).catch((error) => {
+                console.log(error);
+            });
+            break;
+
+        case 'b2_update_bucket':
+            if (process.argv.length < 5) {
+                console.log('usage: node test.js b2_update_bucket bucketID public|private');
+                process.exit(1);
+            }
+            const updateBucketID = process.argv[3];
+            let isUpdateBucketPrivate = true;
+            switch (process.argv[4]) {
+                case 'public':
+                    isUpdateBucketPrivate = false;
+                    break;
+                case 'private':
+                    isUpdateBucketPrivate = true;
+                    break;
+                default:
+                    console.log('Unknown bucketType "%s". Use either "public" or "private".', process.argv[4]);
+                    process.exit(1);
+            }
+
+            b2app.updateBucket(updateBucketID, isUpdateBucketPrivate).then((result) => {
+                console.log(result);
             }).catch((error) => {
                 console.log(error);
             });

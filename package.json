@@ -1,7 +1,7 @@
 {
   "name": "node-b2",
   "version": "1.0.0",
-  "description": "Library for B2 Cloud Storage by Backblaze",
+  "description": "Frontend of Backblaze B2 Cloud Storage for Node.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/nibral/node-b2.git"

@@ -161,6 +161,37 @@ class B2 {
             });
         });
     }
+    
+    /*
+        バケットの設定を更新する
+        
+        bucketType(allPublic|allPrivate)を切り替える
+        
+        https://www.backblaze.com/b2/docs/b2_update_bucket.html
+    */
+    updateBucket(bucketID, isPrivateBucket) {
+         return new Promise((resolve, reject) => {
+            const options = {
+                method: 'POST',
+                uri: this.apiUrl + '/b2api/v1/b2_update_bucket',
+                headers: {
+                    Authorization: this.authorizationToken
+                },
+                body: {
+                    accountId: this.accountID,
+                    bucketId: bucketID,
+                    bucketType: isPrivateBucket ? 'allPrivate' : 'allPublic'
+                },
+                json: true
+            };
+
+            request(options).then((response) => {
+                resolve(response);
+            }).catch((error) => {
+                reject(error);
+            });
+        });
+    }
 }
 
 module.exports = B2;
