@@ -1,31 +1,24 @@
 'use strict';
 
-const request = require('request');
+const request = require('request-promise');
 
 class B2 {
-    constructor() {
-        // nothing to do
+    constructor(accountID, applicationKey) {
+        this.b2_authorize_account(accountID, applicationKey);
     }
 
     b2_authorize_account(accountID, applicationKey) {
-        return new Promise((resolve, reject) => {
-            request.get('https://api.backblaze.com/b2api/v1/b2_authorize_account', {
-                'auth': {
-                    'user': accountID,
-                    'pass': applicationKey,
-                }
-            }, (error, response, body) => {
-                if (error) {
-                    reject(error);
-                    return;
-                }
-                if (response.statusCode == 200) {
-                    resolve(body);
-                } else {
-                    reject(body);
-                }
+        const uri = 'https://api.backblaze.com/b2api/v1/b2_authorize_account';
+        const auth = {
+            'user': accountID,
+            'pass': applicationKey,
+        };
+        request({ 'uri': uri, 'auth': auth, 'json': true }).
+            then((response) => {
+                console.log(response);
+            }).catch((error) => {
+                console.log(error);
             });
-        });
     }
 }
 
