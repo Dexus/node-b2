@@ -11,9 +11,13 @@ co(function* () {
 
     res = yield b2app.authorizeAccount(config.AccountID, config.ApplicationKey);
     console.log(res);
-    
-    res = yield b2app.createBucket('mister-coffee', true);
+
+    // res = yield b2app.createBucket('mister-coffee', true);
+    // console.log(res);
+
+    res = yield b2app.deleteBucket('3272c8a226e8e8de55230b1d');
     console.log(res);
+
 }).catch((error) => {
    console.log(error); 
 });

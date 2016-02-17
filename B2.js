@@ -106,6 +106,32 @@ class B2 {
             });
         });
     }
+    
+    /*
+        指定したIDのバケットを削除する
+    */
+    deleteBucket(bucketID) {
+        return new Promise((resolve, reject) => {
+            const options = {
+                method: 'POST',
+                uri: this.apiUrl + '/b2api/v1/b2_delete_bucket',
+                headers: {
+                    Authorization: this.authorizationToken
+                },
+                body: {
+                    accountId: this.accountID,
+                    bucketId: bucketID
+                },
+                json: true
+            };
+
+            request(options).then((response) => {
+                resolve(response);
+            }).catch((error) => {
+                reject(error);
+            });
+        });
+    }
 }
 
 module.exports = B2;
