@@ -109,6 +109,8 @@ class B2 {
     
     /*
         指定したIDのバケットを削除する
+        
+        https://www.backblaze.com/b2/docs/b2_delete_bucket.html
     */
     deleteBucket(bucketID) {
         return new Promise((resolve, reject) => {
