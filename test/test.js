@@ -25,8 +25,8 @@ b2app.authorizeAccount(config.AccountID, config.ApplicationKey).then((response) 
             const bucketName = process.argv[3];
             const isPrivate = (process.argv[4] && process.argv[4] === 'private') ? true : false;
 
-            b2app.createBucket(bucketName, isPrivate).then((response) => {
-                console.log(response);
+            b2app.createBucket(bucketName, isPrivate).then((result) => {
+                console.log(result);
             }).catch((error) => {
                 console.log(error);
             });
@@ -39,8 +39,18 @@ b2app.authorizeAccount(config.AccountID, config.ApplicationKey).then((response) 
             }
             const bucketID = process.argv[3];
 
-            b2app.deleteBucket(bucketID).then((response) => {
-                console.log(response);
+            b2app.deleteBucket(bucketID).then((result) => {
+                console.log(result);
+            }).catch((error) => {
+                console.log(error);
+            });
+            break;
+
+        case 'b2_list_buckets':
+            b2app.listBucket().then((result) => {
+                result.buckets.forEach((bucket) => {
+                    console.log(bucket);
+                });
             }).catch((error) => {
                 console.log(error);
             });

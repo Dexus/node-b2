@@ -134,6 +134,33 @@ class B2 {
             });
         });
     }
+        
+    /*
+        バケットの一覧を取得する
+        
+        https://www.backblaze.com/b2/docs/b2_list_buckets.html
+    */
+    listBucket() {
+        return new Promise((resolve, reject) => {
+            const options = {
+                method: 'POST',
+                uri: this.apiUrl + '/b2api/v1/b2_list_buckets',
+                headers: {
+                    Authorization: this.authorizationToken
+                },
+                body: {
+                    accountId: this.accountID,
+                },
+                json: true
+            };
+
+            request(options).then((response) => {
+                resolve(response);
+            }).catch((error) => {
+                reject(error);
+            });
+        });
+    }
 }
 
 module.exports = B2;
