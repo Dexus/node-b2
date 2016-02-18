@@ -1,5 +1,8 @@
 'use strict';
 
+const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 const request = require('request-promise');
 
 class B2 {
@@ -25,6 +28,26 @@ class B2 {
         } else {
             return false;
         }
+    }
+
+    /*
+        指定されたファイルのSHA-1ハッシュ値を計算する
+    */
+    calculateSHA1Hash(filePath) {
+        return new Promise((resolve, reject) => {
+            const sha1hash = crypto.createHash('sha1');
+            const fileStream = fs.createReadStream(filePath);
+
+            fileStream.on('error', (error) => {
+                reject(error);
+            });
+            fileStream.on('data', (data) => {
+                sha1hash.update(data);
+            });
+            fileStream.on('end', () => {
+                resolve({ hex: sha1hash.digest('hex') });
+            });
+        });
     }
 
     /*
@@ -138,7 +161,7 @@ class B2 {
     }
     
     /*
-        指定したバケットにファイルをアップロードするためのURLを取得する
+        指定したIDのバケットにファイルをアップロードするためのURLを取得する
         
         https://www.backblaze.com/b2/docs/b2_get_upload_url.html
     */
@@ -192,14 +215,15 @@ class B2 {
     }
     
     /*
-        バケットの設定を更新する
+        指定したIDのバケットの設定を更新する
         
-        bucketType(allPublic|allPrivate)を切り替える
+        できること
+        ・bucketType(allPublic|allPrivate)の切り替え
         
         https://www.backblaze.com/b2/docs/b2_update_bucket.html
     */
     updateBucket(bucketID, isPrivateBucket) {
-         return new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             const options = {
                 method: 'POST',
                 uri: this.apiUrl + '/b2api/v1/b2_update_bucket',
@@ -216,6 +240,49 @@ class B2 {
 
             request(options).then((response) => {
                 resolve(response);
+            }).catch((error) => {
+                reject(error);
+            });
+        });
+    }
+    
+    /*
+        指定したIDのバケットにファイルをアップロードする
+    
+        https://www.backblaze.com/b2/docs/b2_upload_file.html
+    */
+    uploadFile(bucketID, uploadFilePath) {
+        return new Promise((resolve, reject) => {
+            // TODO: coで包んで、各処理をyieldで待つようにする。catch句を1つにする。
+            this.calculateSHA1Hash(uploadFilePath).then((hash) => {
+                this.getUploadUrl(bucketID).then((response) => {
+                    const uploadFilename = path.basename(uploadFilePath);
+                    const uploadFilestat = fs.statSync(uploadFilePath);
+
+                    // 注意: uriと認証トークンはb2_get_upload_urlで取得したものを使う
+                    const options = {
+                        method: 'POST',
+                        uri: response.uploadUrl,
+                        headers: {
+                            Authorization: response.authorizationToken,
+                            'X-Bz-File-Name': encodeURIComponent(uploadFilename),
+                            'Content-Type': 'b2/x-auto',
+                            'Content-Length': uploadFilestat.size,
+                            'X-Bz-Content-Sha1': hash.hex
+                        },
+                        json: true
+                    };
+                    console.log(options);
+
+                    // ファイルの中身をrequestに流し込む
+                    fs.createReadStream(uploadFilePath).pipe(request(options)).then((response) => {
+                        resolve(response);
+                    }).catch((error) => {
+                        reject(error);
+                    });
+                }).catch((error) => {
+                    reject(error);
+                });
             }).catch((error) => {
                 reject(error);
             });

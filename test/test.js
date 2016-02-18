@@ -60,9 +60,9 @@ if (target === 'b2_authorize_account') {
                     console.log('usage: node test.js b2_get_upload_url bucketID');
                     process.exit(1);
                 }
-                const uploadBucketID = process.argv[3];
+                const targetBucketID = process.argv[3];
 
-                b2app.getUploadUrl(uploadBucketID).then((result) => {
+                b2app.getUploadUrl(targetBucketID).then((result) => {
                     console.log(result);
                 }).catch((error) => {
                     console.log(error);
@@ -103,6 +103,22 @@ if (target === 'b2_authorize_account') {
                 }).catch((error) => {
                     console.log(error);
                 });
+                break;
+
+            case 'b2_upload_file':
+                if (process.argv.length < 5) {
+                    console.log('usage: node test.js b2_upload_file bucketID file');
+                    process.exit(1);
+                }
+                const uploadBucketID = process.argv[3];
+                const uploadFilePath = process.argv[4];
+
+                b2app.uploadFile(uploadBucketID, uploadFilePath).then((result) => {
+                    console.log(result);
+                }).catch((error) => {
+                    console.log(error);
+                });
+
                 break;
 
             // 該当APIの実装なし
