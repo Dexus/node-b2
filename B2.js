@@ -136,7 +136,34 @@ class B2 {
             });
         });
     }
+    
+    /*
+        指定したバケットにファイルをアップロードするためのURLを取得する
         
+        https://www.backblaze.com/b2/docs/b2_get_upload_url.html
+    */
+    getUploadUrl(bucketID) {
+        return new Promise((resolve, reject) => {
+            const options = {
+                method: 'POST',
+                uri: this.apiUrl + '/b2api/v1/b2_get_upload_url',
+                headers: {
+                    Authorization: this.authorizationToken
+                },
+                body: {
+                    bucketId: bucketID,
+                },
+                json: true
+            };
+
+            request(options).then((response) => {
+                resolve(response);
+            }).catch((error) => {
+                reject(error);
+            });
+        });
+    }
+    
     /*
         バケットの一覧を取得する
         

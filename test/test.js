@@ -46,9 +46,23 @@ if (target === 'b2_authorize_account') {
                     console.log('usage: node test.js b2_delete_bucket bucketID');
                     process.exit(1);
                 }
-                const bucketID = process.argv[3];
+                const deleteBucketID = process.argv[3];
 
-                b2app.deleteBucket(bucketID).then((result) => {
+                b2app.deleteBucket(deleteBucketID).then((result) => {
+                    console.log(result);
+                }).catch((error) => {
+                    console.log(error);
+                });
+                break;
+
+            case 'b2_get_upload_url':
+                if (process.argv.length < 4) {
+                    console.log('usage: node test.js b2_get_upload_url bucketID');
+                    process.exit(1);
+                }
+                const uploadBucketID = process.argv[3];
+
+                b2app.getUploadUrl(uploadBucketID).then((result) => {
                     console.log(result);
                 }).catch((error) => {
                     console.log(error);
