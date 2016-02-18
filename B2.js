@@ -3,8 +3,12 @@
 const request = require('request-promise');
 
 class B2 {
-    constructor() {
-        // nothing to do
+    /*
+        インスタンス生成時に認証情報を記録する
+    */
+    constructor(accountID, applicationKey) {
+        this.accountID = accountID;
+        this.applicationKey = applicationKey;
     }
 
     /*
@@ -24,32 +28,30 @@ class B2 {
     }
 
     /*
-        accountIDとapplicationKeyでアカウントを認証する
+        アカウントを認証する
         
         認証に成功した場合、
-            1. アカウントID(accountID)
-            2. 認証トークン(authorizationToken)
-            3. 認証トークンの有効期限(authorizationTokenExpired)
-            4. APIの起点となるURL(apiUrl)
-            5. ファイルダウンロードの起点となるURL(downloadUrl)
+            1. 認証トークン(authorizationToken)
+            2. 認証トークンの有効期限(authorizationTokenExpired)
+            3. APIの起点となるURL(apiUrl)
+            4. ファイルダウンロードの起点となるURL(downloadUrl)
         を記録する。
         認証に失敗した場合、authorizationTokenExpiredに現時刻をセットする。
         
         https://www.backblaze.com/b2/docs/b2_authorize_account.html
     */
-    authorizeAccount(accountID, applicationKey) {
+    authorizeAccount() {
         return new Promise((resolve, reject) => {
             const options = {
                 uri: 'https://api.backblaze.com/b2api/v1/b2_authorize_account',
                 auth: {
-                    user: accountID,
-                    pass: applicationKey,
+                    user: this.accountID,
+                    pass: this.applicationKey,
                 },
                 json: true
             };
 
             request(options).then((response) => {
-                this.accountID = accountID;
                 this.authorizationToken = response.authorizationToken;
                 this.apiUrl = response.apiUrl;
                 this.downloadUrl = response.downloadUrl;

@@ -13,7 +13,6 @@
   "author": "nibral",
   "license": "MIT",
   "dependencies": {
-    "co": "^4.6.0",
     "request-promise": "^2.0.0"
   }
 }
