@@ -46,6 +46,21 @@ class B2 {
     }
 
     /*
+        fs.statsをPromise化する
+    */
+    stats(filePath) {
+        return new Promise((resolve, reject) => {
+            fs.stat(filePath, (error, stats) => {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve(stats);
+            });
+        });
+    }
+
+    /*
         指定されたファイルのSHA-1ハッシュ値を計算する
     */
     calculateSHA1Hash(filePath) {
@@ -274,9 +289,17 @@ class B2 {
     */
     uploadFile(bucketID, uploadFilePath) {
         return new Promise((resolve, reject) => {
-            // アップロードするファイルのSHA-1ハッシュ値を計算
+            const uploadFilename = path.basename(uploadFilePath);
+            let uploadFileSize = 0;
             let uploadFileHash = '';
-            this.calculateSHA1Hash(uploadFilePath).then((calcResult) => {
+
+            // アップロードするファイルのファイルサイズを計算
+            this.stats(uploadFilePath).then((stats) => {
+                uploadFileSize = stats.size;
+
+                // アップロードするファイルのSHA-1ハッシュ値を計算
+                return this.calculateSHA1Hash(uploadFilePath);
+            }).then((calcResult) => {
                 uploadFileHash = calcResult.sha1hash.digest('hex');
 
                 // 認証情報確認
@@ -286,8 +309,6 @@ class B2 {
                 // アップロード用URL取得
                 return this.getUploadUrl(bucketID);
             }).then((response) => {
-                const uploadFilename = path.basename(uploadFilePath);
-                const uploadFilestat = fs.statSync(uploadFilePath);
 
                 // uriと認証トークンはgetUploadUrlで取得したものを使う
                 const options = {
@@ -297,12 +318,11 @@ class B2 {
                         Authorization: response.authorizationToken,
                         'X-Bz-File-Name': encodeURIComponent(uploadFilename),
                         'Content-Type': 'b2/x-auto',
-                        'Content-Length': uploadFilestat.size,
+                        'Content-Length': uploadFileSize,
                         'X-Bz-Content-Sha1': uploadFileHash
                     },
                     json: true
                 };
-                console.log(options);
 
                 // ファイルの中身をrequestに流し込む
                 return fs.createReadStream(uploadFilePath).pipe(request(options));
