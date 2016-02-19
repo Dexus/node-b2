@@ -57,6 +57,15 @@ if (target === 'b2_authorize_account') {
             case 'b2_list_buckets':
                 return b2app.listBucket();
                 break;
+            
+            case 'b2_list_file_names':
+                if (process.argv.length < 4) {
+                    throw 'usage: node test.js b2_list_file_names bucketID';
+                }
+                const listBucketID = process.argv[3];
+
+                return b2app.listFileNames(listBucketID);
+                break;
 
             case 'b2_update_bucket':
                 if (process.argv.length < 5) {

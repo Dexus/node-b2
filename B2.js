@@ -250,6 +250,48 @@ class B2 {
     }
     
     /*
+        指定したIDのバケットのファイル一覧を取得する
+        
+        https://www.backblaze.com/b2/docs/b2_list_file_names.html
+    */
+    listFileNames(bucketID, startFileName, maxFileCount) {
+        return new Promise((resolve, reject) => {
+            if (!startFileName) {
+                startFileName = null;
+            }
+
+            // 1回のリクエストで取得するファイル数は100以上1000以下で指定
+            if (!maxFileCount || maxFileCount < 100) {
+                maxFileCount = 100;
+            } else if (1000 < maxFileCount) {
+                maxFileCount = 1000;
+            }
+
+            this.confirmAuthorizationToken().then((authInfo) => {
+                const options = {
+                    method: 'POST',
+                    uri: authInfo.apiUrl + '/b2api/v1/b2_list_file_names',
+                    headers: {
+                        Authorization: authInfo.authorizationToken
+                    },
+                    body: {
+                        bucketId: bucketID,
+                        startFileName: startFileName,
+                        maxFileCount: maxFileCount
+                    },
+                    json: true
+                };
+
+                return request(options);
+            }).then((response) => {
+                resolve(response);
+            }).catch((error) => {
+                reject(error);
+            });
+        });
+    }
+    
+    /*
         指定したIDのバケットの設定を更新する
         
         できること
