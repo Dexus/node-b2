@@ -36,6 +36,15 @@ if (target === 'b2_authorize_account') {
                 return b2app.createBucket(newBucketName, isNewBucketPrivate);
                 break;
 
+            case 'b2_download_file_by_id':
+                if (process.argv.length < 4) {
+                    throw 'usage: node test.js b2_download_file_by_id fileID';
+                }
+                const downloadFileID = process.argv[3];
+                
+                return b2app.downloadFileByID(downloadFileID);
+                break;
+
             case 'b2_delete_bucket':
                 if (process.argv.length < 4) {
                     throw 'usage: node test.js b2_delete_bucket bucketID';
