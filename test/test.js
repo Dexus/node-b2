@@ -45,6 +45,15 @@ if (target === 'b2_authorize_account') {
                 return b2app.deleteBucket(deleteBucketID);
                 break;
 
+            case 'b2_get_file_info':
+                if (process.argv.length < 4) {
+                    throw 'usage: node test.js b2_get_file_info fileID';
+                }
+                const targetFileID = process.argv[3];
+
+                return b2app.getFileInfo(targetFileID);
+                break;
+
             case 'b2_get_upload_url':
                 if (process.argv.length < 4) {
                     throw 'usage: node test.js b2_get_upload_url bucketID';
@@ -57,7 +66,7 @@ if (target === 'b2_authorize_account') {
             case 'b2_list_buckets':
                 return b2app.listBucket();
                 break;
-            
+
             case 'b2_list_file_names':
                 if (process.argv.length < 4) {
                     throw 'usage: node test.js b2_list_file_names bucketID';

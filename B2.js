@@ -192,6 +192,35 @@ class B2 {
     }
     
     /*
+        指定したIDのファイル情報を取得する
+        
+        https://www.backblaze.com/b2/docs/b2_get_file_info.html
+    */
+    getFileInfo(fileID) {
+        return new Promise((resolve, reject) => {
+            this.confirmAuthorizationToken().then((authInfo) => {
+                const options = {
+                    method: 'POST',
+                    uri: authInfo.apiUrl + '/b2api/v1/b2_get_file_info',
+                    headers: {
+                        Authorization: authInfo.authorizationToken
+                    },
+                    body: {
+                        fileId: fileID
+                    },
+                    json: true
+                };
+
+                return request(options);
+            }).then((response) => {
+                resolve(response);
+            }).catch((error) => {
+                reject(error);
+            });
+        });
+    }
+    
+    /*
         指定したIDのバケットにファイルをアップロードするためのURLを取得する
         
         https://www.backblaze.com/b2/docs/b2_get_upload_url.html
@@ -294,7 +323,7 @@ class B2 {
     /*
         指定したIDのバケットのファイルと、各ファイルのバージョン一覧を取得する
         
-        https://www.backblaze.com/b2/docs/b2_list_file_names.html
+        https://www.backblaze.com/b2/docs/b2_list_file_versions.html
     */
     listFileVersions(bucketID, startFileName, startFileId, maxFileCount) {
         return new Promise((resolve, reject) => {
