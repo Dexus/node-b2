@@ -7,7 +7,7 @@ const request = require('request-promise');
 
 class B2 {
     /*
-        インスタンス生成時に認証情報を記録する
+        インスタンス生成時にアカウント情報を記録する
     */
     constructor(accountID, applicationKey) {
         this.accountID = accountID;
@@ -17,6 +17,13 @@ class B2 {
 
     /*
         有効な認証トークンがあるか確認する
+        
+        a. 認証トークンが有効期限内なら、記録されている認証情報を返す
+        b. 認証トークンの有効期限を過ぎていたら、認証を試みる
+            b-1. 認証に成功した場合、取得した認証情報を返す
+            b-2. 認証に失敗した場合、エラーを返す
+        c. 1度も認証が行われていない場合、エラーを返す
+            -> 1回目の認証は、authorizeAccount()を明示的に呼び出す必要がある
     */
     confirmAuthorizationToken() {
         return new Promise((resolve, reject) => {
@@ -113,23 +120,25 @@ class B2 {
     */
     createBucket(bucketName, isPrivateBucket) {
         return new Promise((resolve, reject) => {
-            // TODO: bucketNameのValidation
+            this.confirmAuthorizationToken().then((authInfo) => {
+                // TODO: bucketNameのValidation
 
-            const options = {
-                method: 'POST',
-                uri: this.apiUrl + '/b2api/v1/b2_create_bucket',
-                headers: {
-                    Authorization: this.authorizationToken
-                },
-                body: {
-                    accountId: this.accountID,
-                    bucketName: bucketName,
-                    bucketType: isPrivateBucket ? 'allPrivate' : 'allPublic'
-                },
-                json: true
-            };
-            
-            request(options).then((response) => {
+                const options = {
+                    method: 'POST',
+                    uri: authInfo.apiUrl + '/b2api/v1/b2_create_bucket',
+                    headers: {
+                        Authorization: authInfo.authorizationToken
+                    },
+                    body: {
+                        accountId: this.accountID,
+                        bucketName: bucketName,
+                        bucketType: isPrivateBucket ? 'allPrivate' : 'allPublic'
+                    },
+                    json: true
+                };
+
+                return request(options);
+            }).then((response) => {
                 resolve(response);
             }).catch((error) => {
                 reject(error);
@@ -144,20 +153,22 @@ class B2 {
     */
     deleteBucket(bucketID) {
         return new Promise((resolve, reject) => {
-            const options = {
-                method: 'POST',
-                uri: this.apiUrl + '/b2api/v1/b2_delete_bucket',
-                headers: {
-                    Authorization: this.authorizationToken
-                },
-                body: {
-                    accountId: this.accountID,
-                    bucketId: bucketID
-                },
-                json: true
-            };
+            this.confirmAuthorizationToken().then((authInfo) => {
+                const options = {
+                    method: 'POST',
+                    uri: authInfo.apiUrl + '/b2api/v1/b2_delete_bucket',
+                    headers: {
+                        Authorization: authInfo.authorizationToken
+                    },
+                    body: {
+                        accountId: this.accountID,
+                        bucketId: bucketID
+                    },
+                    json: true
+                };
 
-            request(options).then((response) => {
+                return request(options);
+            }).then((response) => {
                 resolve(response);
             }).catch((error) => {
                 reject(error);
@@ -172,19 +183,21 @@ class B2 {
     */
     getUploadUrl(bucketID) {
         return new Promise((resolve, reject) => {
-            const options = {
-                method: 'POST',
-                uri: this.apiUrl + '/b2api/v1/b2_get_upload_url',
-                headers: {
-                    Authorization: this.authorizationToken
-                },
-                body: {
-                    bucketId: bucketID,
-                },
-                json: true
-            };
+            this.confirmAuthorizationToken().then((authInfo) => {
+                const options = {
+                    method: 'POST',
+                    uri: authInfo.apiUrl + '/b2api/v1/b2_get_upload_url',
+                    headers: {
+                        Authorization: authInfo.authorizationToken
+                    },
+                    body: {
+                        bucketId: bucketID,
+                    },
+                    json: true
+                };
 
-            request(options).then((response) => {
+                return request(options);
+            }).then((response) => {
                 resolve(response);
             }).catch((error) => {
                 reject(error);
@@ -199,19 +212,21 @@ class B2 {
     */
     listBucket() {
         return new Promise((resolve, reject) => {
-            const options = {
-                method: 'POST',
-                uri: this.apiUrl + '/b2api/v1/b2_list_buckets',
-                headers: {
-                    Authorization: this.authorizationToken
-                },
-                body: {
-                    accountId: this.accountID,
-                },
-                json: true
-            };
+            this.confirmAuthorizationToken().then((authInfo) => {
+                const options = {
+                    method: 'POST',
+                    uri: authInfo.apiUrl + '/b2api/v1/b2_list_buckets',
+                    headers: {
+                        Authorization: authInfo.authorizationToken
+                    },
+                    body: {
+                        accountId: this.accountID,
+                    },
+                    json: true
+                };
 
-            request(options).then((response) => {
+                return request(options);
+            }).then((response) => {
                 resolve(response);
             }).catch((error) => {
                 reject(error);
@@ -229,21 +244,22 @@ class B2 {
     */
     updateBucket(bucketID, isPrivateBucket) {
         return new Promise((resolve, reject) => {
-            const options = {
-                method: 'POST',
-                uri: this.apiUrl + '/b2api/v1/b2_update_bucket',
-                headers: {
-                    Authorization: this.authorizationToken
-                },
-                body: {
-                    accountId: this.accountID,
-                    bucketId: bucketID,
-                    bucketType: isPrivateBucket ? 'allPrivate' : 'allPublic'
-                },
-                json: true
-            };
-
-            request(options).then((response) => {
+            this.confirmAuthorizationToken().then((authInfo) => {
+                const options = {
+                    method: 'POST',
+                    uri: authInfo.apiUrl + '/b2api/v1/b2_update_bucket',
+                    headers: {
+                        Authorization: authInfo.authorizationToken
+                    },
+                    body: {
+                        accountId: this.accountID,
+                        bucketId: bucketID,
+                        bucketType: isPrivateBucket ? 'allPrivate' : 'allPublic'
+                    },
+                    json: true
+                };
+                return request(options);
+            }).then((response) => {
                 resolve(response);
             }).catch((error) => {
                 reject(error);
@@ -258,36 +274,40 @@ class B2 {
     */
     uploadFile(bucketID, uploadFilePath) {
         return new Promise((resolve, reject) => {
-            // TODO: coで包んで、各処理をyieldで待つようにする。catch句を1つにする。
+            // アップロードするファイルのSHA-1ハッシュ値を計算
+            let uploadFileHash = '';
             this.calculateSHA1Hash(uploadFilePath).then((calcResult) => {
-                this.getUploadUrl(bucketID).then((response) => {
-                    const uploadFilename = path.basename(uploadFilePath);
-                    const uploadFilestat = fs.statSync(uploadFilePath);
+                uploadFileHash = calcResult.sha1hash.digest('hex');
 
-                    // 注意: uriと認証トークンはb2_get_upload_urlで取得したものを使う
-                    const options = {
-                        method: 'POST',
-                        uri: response.uploadUrl,
-                        headers: {
-                            Authorization: response.authorizationToken,
-                            'X-Bz-File-Name': encodeURIComponent(uploadFilename),
-                            'Content-Type': 'b2/x-auto',
-                            'Content-Length': uploadFilestat.size,
-                            'X-Bz-Content-Sha1': calcResult.sha1hash.digest('hex')
-                        },
-                        json: true
-                    };
-                    console.log(options);
+                // 認証情報確認
+                return this.confirmAuthorizationToken();
+            }).then((authInfo) => {
 
-                    // ファイルの中身をrequestに流し込む
-                    fs.createReadStream(uploadFilePath).pipe(request(options)).then((response) => {
-                        resolve(response);
-                    }).catch((error) => {
-                        reject(error);
-                    });
-                }).catch((error) => {
-                    reject(error);
-                });
+                // アップロード用URL取得
+                return this.getUploadUrl(bucketID);
+            }).then((response) => {
+                const uploadFilename = path.basename(uploadFilePath);
+                const uploadFilestat = fs.statSync(uploadFilePath);
+
+                // uriと認証トークンはgetUploadUrlで取得したものを使う
+                const options = {
+                    method: 'POST',
+                    uri: response.uploadUrl,
+                    headers: {
+                        Authorization: response.authorizationToken,
+                        'X-Bz-File-Name': encodeURIComponent(uploadFilename),
+                        'Content-Type': 'b2/x-auto',
+                        'Content-Length': uploadFilestat.size,
+                        'X-Bz-Content-Sha1': uploadFileHash
+                    },
+                    json: true
+                };
+                console.log(options);
+
+                // ファイルの中身をrequestに流し込む
+                return fs.createReadStream(uploadFilePath).pipe(request(options));
+            }).then((response) => {
+                resolve(response);
             }).catch((error) => {
                 reject(error);
             });
