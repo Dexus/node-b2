@@ -12,22 +12,30 @@ class B2 {
     constructor(accountID, applicationKey) {
         this.accountID = accountID;
         this.applicationKey = applicationKey;
+        this.authorizationInfo = {};
     }
 
     /*
         有効な認証トークンがあるか確認する
     */
-    hasValidAuthorizationToken() {
-        if (!this.authorizationTokenExpireDate) {
-            return false;
-        }
+    confirmAuthorizationToken() {
+        return new Promise((resolve, reject) => {
+            if (!this.authorizationInfo.authorizationTokenExpireDate) {
+                reject('authorizationTokenExpireDate is Undefined.');
+                return;
+            }
 
-        const now = new Date();
-        if (now.getTime() < this.authorizationTokenExpireDate) {
-            return true;
-        } else {
-            return false;
-        }
+            const now = new Date();
+            if (now.getTime() < this.authorizationInfo.authorizationTokenExpireDate) {
+                resolve(this.authorizationInfo);
+            } else {
+                this.authorizeAccount().then((response) => {
+                    resolve(response);
+                }).catch((error) => {
+                    reject(error);
+                });;
+            }
+        });
     }
 
     /*
@@ -45,7 +53,7 @@ class B2 {
                 sha1hash.update(data);
             });
             fileStream.on('end', () => {
-                resolve({ hex: sha1hash.digest('hex') });
+                resolve({ sha1hash: sha1hash });
             });
         });
     }
@@ -53,7 +61,7 @@ class B2 {
     /*
         アカウントを認証する
         
-        認証に成功した場合、
+        認証に成功した場合、authorizationInfoに
             1. 認証トークン(authorizationToken)
             2. 認証トークンの有効期限(authorizationTokenExpired)
             3. APIの起点となるURL(apiUrl)
@@ -75,16 +83,13 @@ class B2 {
             };
 
             request(options).then((response) => {
-                this.authorizationToken = response.authorizationToken;
-                this.apiUrl = response.apiUrl;
-                this.downloadUrl = response.downloadUrl;
+                this.authorizationInfo = response;
             
                 // 認証トークンの有効期間は24時間
                 const now = new Date();
-                this.authorizationTokenExpireDate = now.setHours(now.getHours() + 24);
+                this.authorizationInfo.authorizationTokenExpireDate = now.setHours(now.getHours() + 24);
 
-                response['authorizationTokenExpireDate'] = (new Date(this.authorizationTokenExpireDate)).toString();
-                resolve(response);
+                resolve(this.authorizationInfo);
             }).catch((error) => {
                 this.authorizationTokenExpireDate = new Date();
                 reject(error);
@@ -123,7 +128,7 @@ class B2 {
                 },
                 json: true
             };
-
+            
             request(options).then((response) => {
                 resolve(response);
             }).catch((error) => {
@@ -248,13 +253,13 @@ class B2 {
     
     /*
         指定したIDのバケットにファイルをアップロードする
-    
+     
         https://www.backblaze.com/b2/docs/b2_upload_file.html
     */
     uploadFile(bucketID, uploadFilePath) {
         return new Promise((resolve, reject) => {
             // TODO: coで包んで、各処理をyieldで待つようにする。catch句を1つにする。
-            this.calculateSHA1Hash(uploadFilePath).then((hash) => {
+            this.calculateSHA1Hash(uploadFilePath).then((calcResult) => {
                 this.getUploadUrl(bucketID).then((response) => {
                     const uploadFilename = path.basename(uploadFilePath);
                     const uploadFilestat = fs.statSync(uploadFilePath);
@@ -268,7 +273,7 @@ class B2 {
                             'X-Bz-File-Name': encodeURIComponent(uploadFilename),
                             'Content-Type': 'b2/x-auto',
                             'Content-Length': uploadFilestat.size,
-                            'X-Bz-Content-Sha1': hash.hex
+                            'X-Bz-Content-Sha1': calcResult.sha1hash.digest('hex')
                         },
                         json: true
                     };
