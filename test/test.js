@@ -62,9 +62,18 @@ if (target === 'b2_authorize_account') {
                 if (process.argv.length < 4) {
                     throw 'usage: node test.js b2_list_file_names bucketID';
                 }
-                const listBucketID = process.argv[3];
+                const listFileBucketID = process.argv[3];
 
-                return b2app.listFileNames(listBucketID);
+                return b2app.listFileNames(listFileBucketID);
+                break;
+
+            case 'b2_list_file_versions':
+                if (process.argv.length < 4) {
+                    throw 'usage: node test.js b2_list_file_versions bucketID';
+                }
+                const listVersionBucketID = process.argv[3];
+
+                return b2app.listFileVersions(listVersionBucketID);
                 break;
 
             case 'b2_update_bucket':
