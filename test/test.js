@@ -36,6 +36,25 @@ if (target === 'b2_authorize_account') {
                 return b2app.createBucket(newBucketName, isNewBucketPrivate);
                 break;
 
+            case 'b2_delete_bucket':
+                if (process.argv.length < 4) {
+                    throw 'usage: node test.js b2_delete_bucket bucketID';
+                }
+                const deleteBucketID = process.argv[3];
+
+                return b2app.deleteBucket(deleteBucketID);
+                break;
+
+            case 'b2_delete_file_version':
+                if (process.argv.length < 5) {
+                    throw 'usage: node test.js b2_delete_file_version deleteFileName deleteFileID';
+                }
+                const deleteFileName = process.argv[3];
+                const deleteFileID = process.argv[4];
+            
+                return b2app.deleteFileVersion(deleteFileName, deleteFileID);
+                break;
+
             case 'b2_download_file_by_id':
                 if (process.argv.length < 4) {
                     throw 'usage: node test.js b2_download_file_by_id fileID';
@@ -53,15 +72,6 @@ if (target === 'b2_authorize_account') {
                 const downloadFileName = process.argv[4];
 
                 return b2app.downloadFileByName(downloadBucketName, downloadFileName);
-                break;
-
-            case 'b2_delete_bucket':
-                if (process.argv.length < 4) {
-                    throw 'usage: node test.js b2_delete_bucket bucketID';
-                }
-                const deleteBucketID = process.argv[3];
-
-                return b2app.deleteBucket(deleteBucketID);
                 break;
 
             case 'b2_get_file_info':

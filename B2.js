@@ -192,6 +192,37 @@ class B2 {
     }
     
     /*
+        指定した名前とIDのバケットを削除する
+            = ファイルのバージョンを指定して削除できる
+        
+        https://www.backblaze.com/b2/docs/b2_delete_file_version.html
+    */
+    deleteFileVersion(fileName, fileID) {
+        return new Promise((resolve, reject) => {
+            this.confirmAuthorizationToken().then((authInfo) => {
+                const options = {
+                    method: 'POST',
+                    uri: authInfo.apiUrl + '/b2api/v1/b2_delete_file_version',
+                    headers: {
+                        Authorization: authInfo.authorizationToken
+                    },
+                    body: {
+                        fileName: encodeURIComponent(fileName),
+                        fileId: fileID
+                    },
+                    json: true
+                };
+                
+                return request(options);
+            }).then((response) => {
+                resolve(response);
+            }).catch((error) => {
+                reject(error);
+            });
+        });
+    }
+    
+    /*
         指定したIDのファイルをダウンロードする
         
         rangeStart,rangeEndは省略可
@@ -245,12 +276,12 @@ class B2 {
         
         https://www.backblaze.com/b2/docs/b2_download_file_by_name.html
     */
-        downloadFileByName(bucketName, fileName, rangeStart, rangeEnd) {
+    downloadFileByName(bucketName, fileName, rangeStart, rangeEnd) {
         return new Promise((resolve, reject) => {
             this.confirmAuthorizationToken().then((authInfo) => {
                 const options = {
                     method: 'GET',
-                    uri: authInfo.downloadUrl + '/file/' + bucketName + '/' + fileName,
+                    uri: authInfo.downloadUrl + '/file/' + bucketName + '/' + encodeURIComponent(fileName),
                     headers: {
                         Authorization: authInfo.authorizationToken
                     },
