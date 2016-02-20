@@ -239,6 +239,50 @@ class B2 {
     }
     
     /*
+        指定した名前のファイルをダウンロードする
+        
+        rangeStart,rangeEndは省略可
+        
+        https://www.backblaze.com/b2/docs/b2_download_file_by_name.html
+    */
+        downloadFileByName(bucketName, fileName, rangeStart, rangeEnd) {
+        return new Promise((resolve, reject) => {
+            this.confirmAuthorizationToken().then((authInfo) => {
+                const options = {
+                    method: 'GET',
+                    uri: authInfo.downloadUrl + '/file/' + bucketName + '/' + fileName,
+                    headers: {
+                        Authorization: authInfo.authorizationToken
+                    },
+                    json: true
+                };
+
+                // range-request
+                if (rangeStart && rangeEnd) {
+                    options.headers.Range = 'bytes=' + rangeStart + '-' + rangeEnd;
+                }
+
+                // 現時刻を一時ファイル名としてダウンロード後、本来のファイル名にリネームする
+                const now = new Date();
+                const tempFileName = __dirname + path.sep + now.getTime().toString();
+                const tempFileStream = fs.createWriteStream(tempFileName);
+
+                request(options).on('response', (response) => {
+                    const downloadFileName = decodeURIComponent(response.headers['x-bz-file-name']);
+                    fs.rename(tempFileName, downloadFileName, (error) => {
+                        if (error) {
+                            reject(error);
+                        }
+                        resolve(response.headers);
+                    });
+                }).pipe(tempFileStream);
+            }).catch((error) => {
+                reject(error);
+            });
+        });
+    }
+    
+    /*
         指定したIDのファイル情報を取得する
         
         https://www.backblaze.com/b2/docs/b2_get_file_info.html

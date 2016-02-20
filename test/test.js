@@ -41,8 +41,18 @@ if (target === 'b2_authorize_account') {
                     throw 'usage: node test.js b2_download_file_by_id fileID';
                 }
                 const downloadFileID = process.argv[3];
-                
+
                 return b2app.downloadFileByID(downloadFileID);
+                break;
+
+            case 'b2_download_file_by_name':
+                if (process.argv.length < 5) {
+                    throw 'usage: node test.js b2_download_file_by_id bucketName fileName';
+                }
+                const downloadBucketName = process.argv[3];
+                const downloadFileName = process.argv[4];
+
+                return b2app.downloadFileByName(downloadBucketName, downloadFileName);
                 break;
 
             case 'b2_delete_bucket':
