@@ -51,7 +51,7 @@ if (target === 'b2_authorize_account') {
                 }
                 const deleteFileName = process.argv[3];
                 const deleteFileID = process.argv[4];
-            
+
                 return b2app.deleteFileVersion(deleteFileName, deleteFileID);
                 break;
 
@@ -90,6 +90,16 @@ if (target === 'b2_authorize_account') {
                 const targetBucketID = process.argv[3];
 
                 return b2app.getUploadUrl(targetBucketID);
+                break;
+
+            case 'b2_hide_file':
+                if (process.argv.length < 5) {
+                    throw 'usage: node test.js b2_hide_file bucketID fileName';
+                }
+                const containBucketID = process.argv[3];
+                const hideFileName = process.argv[4];
+
+                return b2app.hideFile(containBucketID, hideFileName);
                 break;
 
             case 'b2_list_buckets':

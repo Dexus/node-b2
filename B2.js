@@ -212,7 +212,7 @@ class B2 {
                     },
                     json: true
                 };
-                
+
                 return request(options);
             }).then((response) => {
                 resolve(response);
@@ -358,6 +358,36 @@ class B2 {
                     },
                     body: {
                         bucketId: bucketID,
+                    },
+                    json: true
+                };
+
+                return request(options);
+            }).then((response) => {
+                resolve(response);
+            }).catch((error) => {
+                reject(error);
+            });
+        });
+    }
+    
+    /*
+        指定した名前のファイルの最新バージョンを非表示状態(hidden)にする
+    
+        https://www.backblaze.com/b2/docs/b2_hide_file.html
+    */
+    hideFile(bucketID, fileName) {
+        return new Promise((resolve, reject) => {
+            this.confirmAuthorizationToken().then((authInfo) => {
+                const options = {
+                    method: 'POST',
+                    uri: authInfo.apiUrl + '/b2api/v1/b2_hide_file',
+                    headers: {
+                        Authorization: authInfo.authorizationToken
+                    },
+                    body: {
+                        bucketId: bucketID,
+                        fileName: encodeURIComponent(fileName)
                     },
                     json: true
                 };
