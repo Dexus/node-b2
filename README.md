@@ -1,9 +1,12 @@
-Node.jsからB2 Cloud Storageを使う
+node-b2 [![npm version](https://badge.fury.io/js/node-b2.svg)](https://badge.fury.io/js/node-b2)
+----
+
+Use B2 Cloud Storage from Node.js
 
 Usage
 ----
 
-    const B2 = require('../B2');
+    const B2 = require('node-b2');
     const b2app = new B2(<AccountID>, <ApplicationKey>);
 
     /*
