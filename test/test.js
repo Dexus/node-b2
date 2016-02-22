@@ -9,7 +9,7 @@ const target = process.argv[2];
 
 // B2インスタンス生成
 const config = require('./config.json');
-const B2 = require('../B2');
+const B2 = require('../lib/B2');
 const b2app = new B2(config.AccountID, config.ApplicationKey);
 
 if (target === 'b2_authorize_account') {
